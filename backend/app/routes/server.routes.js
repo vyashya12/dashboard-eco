@@ -14,7 +14,7 @@ module.exports = (app) => {
   router.post("/login", users.login);
 
   // Create a new Server
-  router.post("/", rateLimiterUsingThirdParty, servers.create);
+  router.post("/add", rateLimiterUsingThirdParty, servers.create);
 
   // Get All BackupStatus
   router.get("/status", backupStatus.findAll);
