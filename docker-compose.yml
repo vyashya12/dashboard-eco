@@ -16,6 +16,7 @@ services:
       - PORT=${MYSQL_PORT}
     ports:
       - '9906:3306'
+    network_mode: bridge
     volumes:
       - db:/var/lib/mysql
       - ./db/dbdump.sql:/docker-entrypoint-initdb.d/dbdump.sql
@@ -28,6 +29,7 @@ services:
       - db
     ports:
       - 8000:8000
+    network_mode: bridge
     restart: always
     env_file:
       - .env
@@ -55,6 +57,7 @@ services:
       - REACT_APP_URL=${API_URL}
     ports:
       - 3000:3000
+    network_mode: bridge
 volumes:
   db:
     driver: local
