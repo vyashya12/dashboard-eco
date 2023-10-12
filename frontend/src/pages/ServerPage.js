@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import SideNav from "../components/sidenav/SideNav";
 import { Helmet } from "react-helmet-async";
 import Header from "../components/header/Header";
@@ -11,6 +11,20 @@ const StyledRoot = styled("div")({
   overflow: "hidden",
 });
 function ServerPage() {
+  const [serverData, setServerData] = useState([]);
+
+  let token = {};
+  if (localStorage.hasOwnProperty("token")) {
+    token = localStorage.getItem("token");
+  }
+  useEffect(() => {
+    // fetch(`${process.env.REACT_APP_URL}api/servers/`, {
+    fetch(`${process.env.REACT_APP_URL}api/servers/`, {
+      headers: { "x-access-token": token },
+    })
+      .then((data) => data.json())
+      .then((data) => setServerData(data));
+  }, []);
   return (
     <>
       <Helmet>
@@ -20,8 +34,10 @@ function ServerPage() {
         <SideNav />
         <Header />
         <Container maxWidth="xl" sx={{ mt: 10 }}>
-          <Typography variant="h4">Hi, Welcome back</Typography>
-          <QuickFilteringGrid />
+          <Typography sx={{ mb: 3 }} variant="h4">
+            All Servers
+          </Typography>
+          {serverData.length ? <QuickFilteringGrid data={serverData} /> : null}
         </Container>
       </StyledRoot>
     </>
