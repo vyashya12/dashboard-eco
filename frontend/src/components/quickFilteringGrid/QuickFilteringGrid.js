@@ -1,8 +1,7 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { Config } from "../../config";
 
 const columns = [
   { field: "IP", headerName: "IP" },
@@ -21,23 +20,8 @@ const columns = [
   { field: "ServerUptime", headerName: "ServerUptime" },
 ];
 
-export default function QuickFilteringGrid() {
-  const [serverData, setServerData] = useState([]);
-
-  let token = {};
-  if (localStorage.hasOwnProperty("token")) {
-    token = localStorage.getItem("token");
-  }
-
-  useEffect(() => {
-    // fetch(`${process.env.REACT_APP_URL}api/servers/`, {
-    fetch(`${process.env.REACT_APP_URL}api/servers/`, {
-      headers: { "x-access-token": token },
-    })
-      .then((data) => data.json())
-      .then((data) => setServerData(data));
-  });
-
+export default function QuickFilteringGrid({ data }) {
+  const [serverData, setServerData] = useState(data);
   return (
     <>
       {serverData.length ? (

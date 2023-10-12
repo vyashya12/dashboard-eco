@@ -5,6 +5,7 @@ import DashboardPage from "./pages/DashboardPage";
 import ServerPage from "./pages/ServerPage";
 import Logout from "./pages/Logout";
 import BackupStatus from "./pages/BackupStatus";
+import ServerDetails from "./pages/ServerDetails";
 
 // ----------------------------------------------------------------------
 
@@ -13,6 +14,10 @@ export default function Router() {
     {
       path: "/dashboard",
       element: <DashboardPage />,
+    },
+    {
+      path: "/serverdetails",
+      element: <ServerDetails />,
     },
     {
       path: "/",
