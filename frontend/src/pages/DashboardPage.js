@@ -38,11 +38,29 @@ function DashboardPage() {
 
   let statsChecker = (data) => {
     for (const server of data) {
-      if (server.PercentFree <= 20 && server.PercentFree > 10) {
-        stats.disk20 += 1;
-      }
-      if (server.PercentFree <= 10) {
-        stats.disk10 += 1;
+      if (server.PercentFree) {
+        let splitPercentages = server.PercentFree.split(",");
+        if (splitPercentages.length > 1) {
+          for (const onePercentage of splitPercentages) {
+            if (
+              parseInt(onePercentage.slice(0, -1)) <= 20 &&
+              parseInt(onePercentage.slice(0, -1)) > 10
+            ) {
+              stats.disk20 += 1;
+            } else if (parseInt(onePercentage.slice(0, -1)) <= 10) {
+              stats.disk10 += 1;
+            }
+          }
+        } else {
+          if (
+            parseInt(splitPercentages) <= 20 &&
+            parseInt(splitPercentages) > 10
+          ) {
+            stats.disk20 += 1;
+          } else if (parseInt(splitPercentages) <= 10) {
+            stats.disk10 += 1;
+          }
+        }
       }
       if (
         server.OnlineVPS + server.OfflineVPS >= 30 &&
@@ -53,19 +71,37 @@ function DashboardPage() {
       if (server.OnlineVPS + server.OfflineVPS >= 40) {
         stats.VM40 += 1;
       }
-      if (
-        ((server.TotalMemory - server.UsedMemory) / server.TotalMemory) * 100 <
-        20
-      ) {
-        stats.Ram20 += 1;
-      }
-      if (
-        ((server.TotalMemory - server.UsedMemory) / server.TotalMemory) * 100 <=
-          30 &&
-        ((server.TotalMemory - server.UsedMemory) / server.TotalMemory) * 100 >
-          20
-      ) {
-        stats.Ram30 += 1;
+      let splitTMem = server.TotalMemory.split(",");
+      let splitUMem = server.UsedMemory.split(",");
+      if (splitTMem.length > 1) {
+        splitTMem = splitTMem.slice(0, -1);
+        splitUMem = splitUMem.slice(0, -1);
+        for (let i = 0; i < splitTMem.length; i++) {
+          splitTMem = parseInt(splitTMem[i].slice(0, -3));
+          splitUMem = parseInt(splitUMem[i].slice(0, -3));
+
+          if (((splitTMem - splitUMem) / splitTMem) * 100 < 20) {
+            stats.Ram20 += 1;
+          }
+          if (
+            ((splitTMem - splitUMem) / splitTMem) * 100 <= 30 &&
+            ((splitTMem - splitUMem) / splitTMem) * 100 > 20
+          ) {
+            stats.Ram30 += 1;
+          }
+        }
+      } else {
+        splitTMem = parseInt(splitTMem[0].slice(0, -3));
+        splitUMem = parseInt(splitUMem[0].slice(0, -3));
+        if (((splitTMem - splitUMem) / splitTMem) * 100 < 20) {
+          stats.Ram20 += 1;
+        }
+        if (
+          ((splitTMem - splitUMem) / splitTMem) * 100 <= 30 &&
+          ((splitTMem - splitUMem) / splitTMem) * 100 > 20
+        ) {
+          stats.Ram30 += 1;
+        }
       }
     }
     setReady(true);

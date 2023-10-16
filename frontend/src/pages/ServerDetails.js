@@ -12,6 +12,7 @@ import {
   styled,
 } from "@mui/material";
 import { useLocation } from "react-router-dom";
+import { Config } from "../config";
 import QuickFilteringGrid from "../components/quickFilteringGrid/QuickFilteringGrid";
 import { useNavigate } from "react-router-dom";
 
@@ -28,7 +29,7 @@ function ServerDetails() {
   }
   useEffect(() => {
     // fetch(`${process.env.REACT_APP_URL}api/servers/`, {
-    fetch(`${process.env.REACT_APP_URL}api/servers/`, {
+    fetch(`${Config.api_url}api/servers/`, {
       headers: { "x-access-token": token },
     })
       .then((data) => data.json())
@@ -38,39 +39,153 @@ function ServerDetails() {
 
   const dataFilter = (data) => {
     let filtered = data;
+    let arrayObj = [];
     if (location.state.mode === "Disk Space under 10%") {
-      filtered = data.filter((item) => item.PercentFree <= 10);
-      setUsableData(filtered);
+      data.forEach((item) => {
+        let splitPercentages = item.PercentFree.split(",");
+        if (splitPercentages.length > 1) {
+          splitPercentages.forEach((percentage) => {
+            if (parseInt(percentage.slice(0, -1)) <= 10) {
+              const objExists = arrayObj.some((obj) => obj.id === item.id);
+
+              if (!objExists) {
+                arrayObj.push(item);
+              }
+            }
+          });
+        } else {
+          if (parseInt(item.PercentFree.slice(0, -1)) <= 10) {
+            const objExists = arrayObj.some((obj) => obj.id === item.id);
+
+            if (!objExists) {
+              arrayObj.push(item);
+            }
+          }
+        }
+      });
     } else if (location.state.mode === "Disk Space under 20%") {
-      filtered = data.filter(
-        (item) => item.PercentFree <= 20 && item.PercentFree > 10
-      );
-      setUsableData(filtered);
+      data.forEach((item) => {
+        let splitPercentages = item.PercentFree.split(",");
+        if (splitPercentages.length > 1) {
+          splitPercentages = splitPercentages.slice(0, -1);
+          splitPercentages.forEach((percentage) => {
+            if (
+              parseInt(percentage.slice(0, -1)) <= 20 &&
+              parseInt(percentage.slice(0, -1)) > 10
+            ) {
+              const objExists = arrayObj.some((obj) => obj.id === item.id);
+
+              if (!objExists) {
+                arrayObj.push(item);
+              }
+            }
+          });
+        } else {
+          if (
+            parseInt(item.PercentFree.slice(0, -1)) <= 20 &&
+            parseInt(item.PercentFree.slice(0, -1)) > 10
+          ) {
+            const objExists = arrayObj.some((obj) => obj.id === item.id);
+
+            if (!objExists) {
+              arrayObj.push(item);
+            }
+          }
+        }
+      });
     } else if (location.state.mode === "RAM under 20%") {
-      filtered = data.filter(
-        (item) =>
-          ((item.TotalMemory - item.UsedMemory) / item.TotalMemory) * 100 <= 20
-      );
-      setUsableData(filtered);
+      // filtered = data.filter(
+      //   (item) =>
+      //     ((item.TotalMemory - item.UsedMemory) / item.TotalMemory) * 100 <= 20
+      // );
+      data.forEach((item) => {
+        let splitTotMem = item.TotalMemory.split(",");
+        let splitUseMem = item.UsedMemory.split(",");
+        if (splitTotMem.length > 1) {
+          splitTotMem = splitTotMem.slice(0, -1);
+          splitUseMem = splitTotMem.slice(0, -1);
+          splitTotMem.forEach((totMem, i) => {
+            if (((totMem - splitUseMem[i]) / totMem) * 100 <= 20) {
+              const objExists = arrayObj.some((obj) => obj.id === item.id);
+
+              if (!objExists) {
+                arrayObj.push(item);
+              }
+            }
+          });
+        } else {
+          if (
+            ((parseInt(splitTotMem[0].slice(0, -3)) -
+              parseInt(splitUseMem[0].slice(0, -3))) /
+              parseInt(splitTotMem[0].slice(0, -3))) *
+              100 <=
+            20
+          ) {
+            const objExists = arrayObj.some((obj) => obj.id === item.id);
+
+            if (!objExists) {
+              arrayObj.push(item);
+            }
+          }
+        }
+      });
     } else if (location.state.mode === "RAM under 30%") {
-      filtered = data.filter(
-        (item) =>
-          ((item.TotalMemory - item.UsedMemory) / item.TotalMemory) * 100 <=
-            30 &&
-          ((item.TotalMemory - item.UsedMemory) / item.TotalMemory) * 100 > 20
-      );
-      setUsableData(filtered);
+      // filtered = data.filter(
+      //   (item) =>
+      //     ((item.TotalMemory - item.UsedMemory) / item.TotalMemory) * 100 <=
+      //       30 &&
+      //     ((item.TotalMemory - item.UsedMemory) / item.TotalMemory) * 100 > 20
+      // );
+      data.forEach((item) => {
+        let splitTotMem = item.TotalMemory.split(",");
+        let splitUseMem = item.UsedMemory.split(",");
+        if (splitTotMem.length > 1) {
+          splitTotMem = splitTotMem.slice(0, -1);
+          splitUseMem = splitTotMem.slice(0, -1);
+          splitTotMem.forEach((totMem, i) => {
+            if (
+              ((totMem - splitUseMem[i]) / totMem) * 100 <= 30 &&
+              ((totMem - splitUseMem[i]) / totMem) * 100 > 20
+            ) {
+              const objExists = arrayObj.some((obj) => obj.id === item.id);
+
+              if (!objExists) {
+                arrayObj.push(item);
+              }
+            }
+          });
+        } else {
+          if (
+            ((parseInt(splitTotMem[0].slice(0, -3)) -
+              parseInt(splitUseMem[0].slice(0, -3))) /
+              parseInt(splitTotMem[0].slice(0, -3))) *
+              100 <=
+              30 &&
+            ((parseInt(splitTotMem[0].slice(0, -3)) -
+              parseInt(splitUseMem[0].slice(0, -3))) /
+              parseInt(splitTotMem[0].slice(0, -3))) *
+              100 >
+              20
+          ) {
+            const objExists = arrayObj.some((obj) => obj.id === item.id);
+            if (!objExists) {
+              arrayObj.push(item);
+            }
+          }
+        }
+      });
     } else if (location.state.mode === "above 30 Virtual Machines") {
       filtered = data.filter(
         (item) =>
           item.OnlineVPS + item.OfflineVPS >= 30 &&
           item.OnlineVPS + item.OfflineVPS < 40
       );
-      setUsableData(filtered);
+      arrayObj = filtered;
     } else if (location.state.mode === "above 40 Virtual Machines") {
       filtered = data.filter((item) => item.OnlineVPS + item.OfflineVPS >= 40);
-      setUsableData(filtered);
+      arrayObj = filtered;
     }
+    setUsableData(arrayObj);
   };
 
   const StyledRoot = styled("div")({
