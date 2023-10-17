@@ -19,7 +19,6 @@ import Iconify from "../components/iconify/Iconify";
 import { useNavigate } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
 import jwt from "jwt-decode";
-import { Config } from "../config";
 
 const StyledContent = styled("div")(({ theme }) => ({
   maxWidth: 480,
@@ -66,7 +65,6 @@ function LoginPage() {
       setHelperText("Fill your input lah Bro!!");
     } else {
       // fetch(`${process.env.REACT_APP_URL}api/servers/login`, {
-      console.log(Config.api_url);
       fetch(`${process.env.REACT_APP_URL}api/servers/login`, {
         method: "POST",
         headers: {

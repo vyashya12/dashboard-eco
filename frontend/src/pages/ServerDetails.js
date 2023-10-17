@@ -12,7 +12,6 @@ import {
   styled,
 } from "@mui/material";
 import { useLocation } from "react-router-dom";
-import { Config } from "../config";
 import QuickFilteringGrid from "../components/quickFilteringGrid/QuickFilteringGrid";
 import { useNavigate } from "react-router-dom";
 
