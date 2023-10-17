@@ -41,8 +41,10 @@ function ServerDetails() {
     if (location.state.mode === "Disk Space under 10%") {
       data.forEach((item) => {
         let splitPercentages = item.PercentFree.split(",");
+        console.log(splitPercentages);
         if (splitPercentages.length > 1) {
           splitPercentages.forEach((percentage) => {
+            console.log(parseInt(percentage.slice(0, -1)));
             if (parseInt(percentage.slice(0, -1)) <= 10) {
               const objExists = arrayObj.some((obj) => obj.id === item.id);
 
@@ -52,7 +54,8 @@ function ServerDetails() {
             }
           });
         } else {
-          if (parseInt(item.PercentFree.slice(0, -1)) <= 10) {
+          if (parseInt(splitPercentages[0].slice(0, -1)) <= 10) {
+            console.log(splitPercentages[0].slice(0, -1));
             const objExists = arrayObj.some((obj) => obj.id === item.id);
 
             if (!objExists) {
