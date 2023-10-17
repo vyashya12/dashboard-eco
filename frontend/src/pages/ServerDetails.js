@@ -28,8 +28,7 @@ function ServerDetails() {
     token = localStorage.getItem("token");
   }
   useEffect(() => {
-    // fetch(`${process.env.REACT_APP_URL}api/servers/`, {
-    fetch(`${Config.api_url}api/servers/`, {
+    fetch(`${process.env.REACT_APP_URL}api/servers/`, {
       headers: { "x-access-token": token },
     })
       .then((data) => data.json())
