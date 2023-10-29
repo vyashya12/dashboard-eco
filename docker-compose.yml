@@ -38,6 +38,7 @@ services:
       DB_PASSWORD: ${MYSQL_PASSWORD}
       DB_NAME: ${MYSQL_DATABASE}
       SCRIPTPASSWORD: "${SCRIPTPASSWORD}"
+      RATELIMITER: ${RATELIMITER}
     links:
       - db
   frontend:
