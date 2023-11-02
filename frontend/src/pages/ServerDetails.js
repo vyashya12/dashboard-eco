@@ -95,14 +95,10 @@ function ServerDetails() {
         }
       });
     } else if (location.state.mode === "RAM under 20%") {
-      // filtered = data.filter(
-      //   (item) =>
-      //     ((item.TotalMemory - item.UsedMemory) / item.TotalMemory) * 100 <= 20
-      // );
       data.forEach((item) => {
         let splitTotMem = item.TotalMemory.split(",");
         let splitUseMem = item.UsedMemory.split(",");
-        if (splitTotMem.length > 1) {
+        if (splitTotMem.length > 2) {
           splitTotMem = splitTotMem.slice(0, -1);
           splitUseMem = splitTotMem.slice(0, -1);
           splitTotMem.forEach((totMem, i) => {
@@ -131,22 +127,24 @@ function ServerDetails() {
         }
       });
     } else if (location.state.mode === "RAM under 30%") {
-      // filtered = data.filter(
-      //   (item) =>
-      //     ((item.TotalMemory - item.UsedMemory) / item.TotalMemory) * 100 <=
-      //       30 &&
-      //     ((item.TotalMemory - item.UsedMemory) / item.TotalMemory) * 100 > 20
-      // );
       data.forEach((item) => {
         let splitTotMem = item.TotalMemory.split(",");
         let splitUseMem = item.UsedMemory.split(",");
-        if (splitTotMem.length > 1) {
+        if (splitTotMem.length > 2) {
           splitTotMem = splitTotMem.slice(0, -1);
-          splitUseMem = splitTotMem.slice(0, -1);
+          splitUseMem = splitUseMem.slice(0, -1);
           splitTotMem.forEach((totMem, i) => {
             if (
-              ((totMem - splitUseMem[i]) / totMem) * 100 <= 30 &&
-              ((totMem - splitUseMem[i]) / totMem) * 100 > 20
+              (parseFloat(totMem.slice(0, -3)) -
+                parseFloat(splitUseMem[i].slice(0, -3)) /
+                  parseFloat(totMem.slice(0, -3))) *
+                100 <=
+                30 &&
+              (parseFloat(totMem.slice(0, -3)) -
+                parseFloat(splitUseMem[i].slice(0, -3)) /
+                  parseFloat(totMem.slice(0, -3))) *
+                100 >
+                20
             ) {
               const objExists = arrayObj.some((obj) => obj.id === item.id);
 
