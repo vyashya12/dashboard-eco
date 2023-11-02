@@ -146,6 +146,7 @@ function ServerDetails() {
                 100 >
                 20
             ) {
+              console.log(item);
               const objExists = arrayObj.some((obj) => obj.id === item.id);
 
               if (!objExists) {
@@ -166,6 +167,8 @@ function ServerDetails() {
               100 >
               20
           ) {
+            console.log(item);
+
             const objExists = arrayObj.some((obj) => obj.id === item.id);
             if (!objExists) {
               arrayObj.push(item);
