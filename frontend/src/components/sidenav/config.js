@@ -9,26 +9,16 @@ import Iconify from "../iconify/Iconify";
 // );
 
 const navConfig = [
-  {
-    title: "dashboard",
-    path: "/dashboard",
-    icon: <Iconify icon={"material-symbols:query-stats-rounded"} />,
-  },
-  {
-    title: "Servers",
-    path: "/servers",
-    icon: <Iconify icon={"solar:server-bold"} />,
-  },
-  {
-    title: "Backup Status",
-    path: "/backup",
-    icon: <Iconify icon={"material-symbols:backup-outline-rounded"} />,
-  },
-  {
-    title: "logout",
-    path: "/logout",
-    icon: <Iconify icon={"material-symbols:logout"} />,
-  },
+	{
+		title: "dashboard",
+		path: "/dashboard",
+		icon: <Iconify icon={"material-symbols:query-stats-rounded"} />,
+	},
+	{
+		title: "logout",
+		path: "/logout",
+		icon: <Iconify icon={"material-symbols:logout"} />,
+	},
 ];
 
 export default navConfig;

@@ -1,123 +1,188 @@
-import PropTypes from "prop-types";
-import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
-// @mui
-import { styled, alpha } from "@mui/material/styles";
-import { Box, Link, Drawer, Typography, Avatar, Stack } from "@mui/material";
-// hooks
-// components
-import NavSection from "../navsection/NavSection";
-import "./SideNav.css";
-//
-import navConfig from "./config";
-// ----------------------------------------------------------------------
+import * as React from "react";
+import { styled, useTheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import MuiDrawer from "@mui/material/Drawer";
+import MuiAppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import List from "@mui/material/List";
+import CssBaseline from "@mui/material/CssBaseline";
+import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import SpaceDashboardIcon from "@mui/icons-material/SpaceDashboard";
+import LogoutIcon from "@mui/icons-material/Logout";
 
-const NAV_WIDTH = 280;
+const drawerWidth = 240;
 
-const StyledAccount = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  padding: theme.spacing(2, 2.5),
-  borderRadius: Number(theme.shape.borderRadius) * 1.5,
-  backgroundColor: alpha(theme.palette.grey[500], 0.12),
+const openedMixin = (theme) => ({
+	width: drawerWidth,
+	transition: theme.transitions.create("width", {
+		easing: theme.transitions.easing.sharp,
+		duration: theme.transitions.duration.enteringScreen,
+	}),
+	overflowX: "hidden",
+});
+
+const closedMixin = (theme) => ({
+	transition: theme.transitions.create("width", {
+		easing: theme.transitions.easing.sharp,
+		duration: theme.transitions.duration.leavingScreen,
+	}),
+	overflowX: "hidden",
+	width: `calc(${theme.spacing(7)} + 1px)`,
+	[theme.breakpoints.up("sm")]: {
+		width: `calc(${theme.spacing(8)} + 1px)`,
+	},
+});
+
+const DrawerHeader = styled("div")(({ theme }) => ({
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "flex-end",
+	padding: theme.spacing(0, 1),
+	// necessary for content to be below app bar
+	...theme.mixins.toolbar,
 }));
 
-// ----------------------------------------------------------------------
+const AppBar = styled(MuiAppBar, {
+	shouldForwardProp: (prop) => prop !== "open",
+})(({ theme, open }) => ({
+	zIndex: theme.zIndex.drawer + 1,
+	transition: theme.transitions.create(["width", "margin"], {
+		easing: theme.transitions.easing.sharp,
+		duration: theme.transitions.duration.leavingScreen,
+	}),
+	...(open && {
+		marginLeft: drawerWidth,
+		width: `calc(100% - ${drawerWidth}px)`,
+		transition: theme.transitions.create(["width", "margin"], {
+			easing: theme.transitions.easing.sharp,
+			duration: theme.transitions.duration.enteringScreen,
+		}),
+	}),
+}));
 
-SideNav.propTypes = {
-  openNav: PropTypes.bool,
-  onCloseNav: PropTypes.func,
-};
+const Drawer = styled(MuiDrawer, {
+	shouldForwardProp: (prop) => prop !== "open",
+})(({ theme, open }) => ({
+	width: drawerWidth,
+	flexShrink: 0,
+	whiteSpace: "nowrap",
+	boxSizing: "border-box",
+	...(open && {
+		...openedMixin(theme),
+		"& .MuiDrawer-paper": openedMixin(theme),
+	}),
+	...(!open && {
+		...closedMixin(theme),
+		"& .MuiDrawer-paper": closedMixin(theme),
+	}),
+}));
 
-export default function SideNav({ openNav, onCloseNav }) {
-  const { pathname } = useLocation();
+export default function MiniDrawer() {
+	const theme = useTheme();
+	const [open, setOpen] = React.useState(false);
 
-  useEffect(() => {
-    if (openNav) {
-      onCloseNav();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+	const handleDrawerOpen = () => {
+		setOpen(true);
+	};
 
-  let userData = {};
-  if (localStorage.hasOwnProperty("user")) {
-    userData = localStorage.getItem("user");
-    userData = JSON.parse(userData);
-  }
-  let userName = userData.name;
+	const handleDrawerClose = () => {
+		setOpen(false);
+	};
 
-  const renderContent = (
-    <>
-      <Box sx={{ px: 2.5, py: 5, display: "inline-flex" }}>
-        <Box
-          component="img"
-          src={require("../../images/exabLogo.png")}
-          sx={{ width: 40, height: 40, cursor: "pointer" }}
-        />
-      </Box>
-
-      <Box sx={{ mb: 5, mx: 2.5 }}>
-        <Link underline="none">
-          <StyledAccount>
-            <Avatar
-              src={`https://ui-avatars.com/api/?name=${userName}&size=128&background=0D8ABC&color=fff`}
-              alt="Account"
-            />
-
-            <Box sx={{ ml: 2 }}>
-              <Typography variant="subtitle2" sx={{ color: "text.primary" }}>
-                {userName}
-              </Typography>
-
-              <Typography
-                variant="body2"
-                sx={{ color: "text.secondary" }}
-              ></Typography>
-            </Box>
-          </StyledAccount>
-        </Link>
-      </Box>
-      <NavSection data={navConfig} />
-
-      <Box sx={{ flexGrow: 1 }} />
-
-      <Box sx={{ px: 2.5, pb: 3, mt: 10 }}>
-        <Stack
-          alignItems="center"
-          spacing={3}
-          sx={{ pt: 5, borderRadius: 2, position: "relative" }}
-        >
-          <Box
-            component="img"
-            src={require("../../images/exabBanner.png")}
-            sx={{ width: 100, position: "absolute", top: -50 }}
-          />
-        </Stack>
-      </Box>
-    </>
-  );
-
-  return (
-    <Box
-      component="nav"
-      sx={{
-        flexShrink: { lg: 0 },
-        width: { lg: NAV_WIDTH },
-      }}
-    >
-      <Drawer
-        open
-        variant="permanent"
-        PaperProps={{
-          sx: {
-            width: NAV_WIDTH,
-            bgcolor: "#F2F2FF",
-            borderRightStyle: "dashed",
-          },
-        }}
-      >
-        {renderContent}
-      </Drawer>
-    </Box>
-  );
+	return (
+		<Box sx={{ display: "flex" }}>
+			<CssBaseline />
+			<AppBar
+				position="fixed"
+				open={open}
+			>
+				<Toolbar>
+					<IconButton
+						color="inherit"
+						aria-label="open drawer"
+						onClick={handleDrawerOpen}
+						edge="start"
+						sx={{
+							marginRight: 5,
+							...(open && { display: "none" }),
+						}}
+					>
+						<MenuIcon />
+					</IconButton>
+					<Typography
+						variant="h6"
+						noWrap
+						component="div"
+					>
+						EcoShop POC
+					</Typography>
+				</Toolbar>
+			</AppBar>
+			<Drawer
+				variant="permanent"
+				open={open}
+			>
+				<DrawerHeader>
+					<IconButton onClick={handleDrawerClose}>
+						{theme.direction === "rtl" ? (
+							<ChevronRightIcon />
+						) : (
+							<ChevronLeftIcon />
+						)}
+					</IconButton>
+				</DrawerHeader>
+				<Divider />
+				<List>
+					{[
+						{ header: "Dashboard", link: "dashboard" },
+						{ header: "Logout", link: "logout" },
+					].map((item, index) => (
+						<ListItem
+							key={item.header}
+							disablePadding
+							sx={{ display: "block" }}
+						>
+							<ListItemButton
+								sx={{
+									minHeight: 48,
+									justifyContent: open ? "initial" : "center",
+									px: 2.5,
+								}}
+								href={item.link}
+							>
+								<ListItemIcon
+									sx={{
+										minWidth: 0,
+										mr: open ? 3 : "auto",
+										justifyContent: "center",
+									}}
+								>
+									{index % 2 === 0 ? <SpaceDashboardIcon /> : <LogoutIcon />}
+								</ListItemIcon>
+								<ListItemText
+									primary={item.header}
+									sx={{ opacity: open ? 1 : 0 }}
+								/>
+							</ListItemButton>
+						</ListItem>
+					))}
+				</List>
+			</Drawer>
+			<Box
+				component="main"
+				sx={{ flexGrow: 1, p: 3 }}
+			>
+				<DrawerHeader />
+			</Box>
+		</Box>
+	);
 }

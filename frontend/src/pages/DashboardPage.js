@@ -1,352 +1,154 @@
 import React, { useEffect, useState } from "react";
 import SideNav from "../components/sidenav/SideNav";
 import { Helmet } from "react-helmet-async";
-import Header from "../components/header/Header";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import {
-  Button,
-  Container,
-  Grid,
-  Paper,
-  Stack,
-  Typography,
-  styled,
+	Button,
+	CircularProgress,
+	Container,
+	FormControl,
+	Grid,
+	InputLabel,
+	MenuItem,
+	NativeSelect,
+	Paper,
+	Select,
+	Stack,
+	TextField,
+	Typography,
+	styled,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { red } from "@mui/material/colors";
+import { DatePicker, DateTimePicker } from "@mui/x-date-pickers";
+import QuickFilteringGrid from "../components/quickFilteringGrid/QuickFilteringGrid";
 
 const color = red[100];
 
 const StyledRoot = styled("div")({
-  display: "flex",
-  minHeight: "100%",
-  overflow: "hidden",
+	display: "flex",
+	minHeight: "100%",
+	overflow: "hidden",
 });
 
 function DashboardPage() {
-  const [serverData, setServerData] = useState([]);
-  const [ready, setReady] = useState(false);
-  const [stats, setStats] = useState({
-    disk10: 0,
-    disk20: 0,
-    Ram20: 0,
-    Ram30: 0,
-    VM30: 0,
-    VM40: 0,
-  });
-  const navigate = useNavigate();
+	const [tableData, setTableData] = useState();
+	const [ready, setReady] = useState(false);
+	const [value, setValue] = useState();
+	const [requestData, setRequestData] = useState({});
 
-  let statsChecker = (data) => {
-    for (const server of data) {
-      if (server.PercentFree) {
-        let splitPercentages = server.PercentFree.split(",");
-        if (splitPercentages.length > 1) {
-          for (const onePercentage of splitPercentages) {
-            if (
-              parseInt(onePercentage.slice(0, -1)) <= 20 &&
-              parseInt(onePercentage.slice(0, -1)) > 10
-            ) {
-              stats.disk20 += 1;
-            } else if (parseInt(onePercentage.slice(0, -1)) <= 10) {
-              stats.disk10 += 1;
-            }
-          }
-        } else {
-          if (
-            parseInt(splitPercentages) <= 20 &&
-            parseInt(splitPercentages) > 10
-          ) {
-            stats.disk20 += 1;
-          } else if (parseInt(splitPercentages) <= 10) {
-            stats.disk10 += 1;
-          }
-        }
-      }
-      if (
-        server.OnlineVPS + server.OfflineVPS >= 30 &&
-        server.OnlineVPS + server.OfflineVPS < 40
-      ) {
-        stats.VM30 += 1;
-      }
-      if (server.OnlineVPS + server.OfflineVPS >= 40) {
-        stats.VM40 += 1;
-      }
-      let splitTMem = server.TotalMemory.split(",");
-      let splitUMem = server.UsedMemory.split(",");
-      if (splitTMem.length > 1) {
-        splitTMem = splitTMem.slice(0, -1);
-        splitUMem = splitUMem.slice(0, -1);
-        for (let i = 0; i < splitTMem.length; i++) {
-          splitTMem = parseInt(splitTMem[i].slice(0, -3));
-          splitUMem = parseInt(splitUMem[i].slice(0, -3));
+	useEffect(() => {
+		theftData();
+	}, []);
 
-          if (((splitTMem - splitUMem) / splitTMem) * 100 < 20) {
-            stats.Ram20 += 1;
-          }
-          if (
-            ((splitTMem - splitUMem) / splitTMem) * 100 <= 30 &&
-            ((splitTMem - splitUMem) / splitTMem) * 100 > 20
-          ) {
-            stats.Ram30 += 1;
-          }
-        }
-      } else {
-        splitTMem = parseInt(splitTMem[0].slice(0, -3));
-        splitUMem = parseInt(splitUMem[0].slice(0, -3));
-        if (((splitTMem - splitUMem) / splitTMem) * 100 < 20) {
-          stats.Ram20 += 1;
-        }
-        if (
-          ((splitTMem - splitUMem) / splitTMem) * 100 <= 30 &&
-          ((splitTMem - splitUMem) / splitTMem) * 100 > 20
-        ) {
-          stats.Ram30 += 1;
-        }
-      }
-    }
-    setReady(true);
-  };
+	let theftData = async () => {
+		const requestOptions = {
+			method: "POST",
+			redirect: "follow",
+		};
 
-  useEffect(() => {
-    if (!localStorage.hasOwnProperty("token")) {
-      navigate("/404", { replace: true });
-    }
+		await fetch(
+			"http://localhost:8000/sales?startDate=2024-02-14T12:00:00.000Z&endDate=2024-02-14T14:00:00.000Z",
+			requestOptions
+		)
+			.then((response) => response.json())
+			.then((result) => {
+				setTableData(result.finalData);
+				setReady(true);
+			})
+			.catch((error) => console.error(error));
+		setReady(true);
+	};
 
-    fetch(`${process.env.REACT_APP_URL}api/servers/`, {
-      headers: { "x-access-token": token },
-    })
-      .then((data) => data.json())
-      .then((data) => statsChecker(data));
-  }, []);
-
-  let token = {};
-  if (localStorage.hasOwnProperty("token")) {
-    token = localStorage.getItem("token");
-  }
-
-  const modeSender = (mode) => {
-    navigate("/serverdetails", { state: { mode: mode } });
-  };
-
-  return (
-    <>
-      <Helmet>
-        <title> Dashboard | Monitoring Dashboard </title>
-      </Helmet>
-      <StyledRoot>
-        <SideNav />
-        <Header />
-        <Container maxWidth="xl" sx={{ mt: 10 }}>
-          <Typography variant="h5">Hi, Welcome back</Typography>
-
-          {ready ? (
-            <Grid container spacing={2} sx={{ mt: 3 }}>
-              <Grid item xs={3}>
-                <Paper
-                  square={false}
-                  elevation={3}
-                  sx={{
-                    bgcolor: color,
-                    height: 150,
-                    padding: 2,
-                  }}
-                >
-                  <Typography variant="h5" gutterBottom>
-                    Disk Size 10%
-                  </Typography>
-                  <Stack
-                    direction={"row"}
-                    sx={{ flex: 1, justifyContent: "space-between", mt: 10 }}
-                  >
-                    <Typography variant="h5" gutterBottom>
-                      {stats.disk10}
-                    </Typography>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={() => modeSender("Disk Space under 10%")}
-                    >
-                      <ArrowForwardIosIcon />
-                    </Button>
-                  </Stack>
-                </Paper>
-              </Grid>
-              <Grid item xs={3}>
-                <Paper
-                  square={false}
-                  elevation={3}
-                  sx={{
-                    bgcolor: "lightgoldenrodyellow",
-                    height: 150,
-                    padding: 2,
-                  }}
-                >
-                  <Typography variant="h5" gutterBottom>
-                    Disk Size 20%
-                  </Typography>
-                  <Stack
-                    direction={"row"}
-                    sx={{ flex: 1, justifyContent: "space-between", mt: 10 }}
-                  >
-                    <Typography variant="h5" gutterBottom>
-                      {stats.disk20}
-                    </Typography>
-                    <Button
-                      onClick={() => modeSender("Disk Space under 20%")}
-                      variant="outlined"
-                      sx={{
-                        color: "#ffc400",
-                        borderColor: "#ffc400",
-                        "&:hover": {
-                          backgroundColor: "#ffff8d",
-                          borderColor: "#ffab00",
-                          boxShadow: "none",
-                        },
-                      }}
-                    >
-                      <ArrowForwardIosIcon />
-                    </Button>
-                  </Stack>
-                </Paper>
-              </Grid>
-              <Grid item xs={3}>
-                <Paper
-                  square={false}
-                  elevation={3}
-                  sx={{ bgcolor: color, height: 150, padding: 2 }}
-                >
-                  <Typography variant="h5" gutterBottom>
-                    Free Ram 20%
-                  </Typography>
-                  <Stack
-                    direction={"row"}
-                    sx={{ flex: 1, justifyContent: "space-between", mt: 10 }}
-                  >
-                    <Typography variant="h5" gutterBottom>
-                      {stats.Ram20}
-                    </Typography>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={() => modeSender("RAM under 20%")}
-                    >
-                      <ArrowForwardIosIcon />
-                    </Button>
-                  </Stack>
-                </Paper>
-              </Grid>
-              <Grid item xs={3}>
-                <Paper
-                  square={false}
-                  elevation={3}
-                  sx={{
-                    bgcolor: "lightgoldenrodyellow",
-                    height: 150,
-                    padding: 2,
-                  }}
-                >
-                  <Typography variant="h5" gutterBottom>
-                    Free Ram 30%
-                  </Typography>
-                  <Stack
-                    direction={"row"}
-                    sx={{ flex: 1, justifyContent: "space-between", mt: 10 }}
-                  >
-                    <Typography variant="h5" gutterBottom>
-                      {stats.Ram30}
-                    </Typography>
-                    <Button
-                      onClick={() => modeSender("RAM under 30%")}
-                      variant="outlined"
-                      sx={{
-                        color: "#ffc400",
-                        borderColor: "#ffc400",
-                        "&:hover": {
-                          backgroundColor: "#ffff8d",
-                          borderColor: "#ffab00",
-                          boxShadow: "none",
-                        },
-                      }}
-                    >
-                      <ArrowForwardIosIcon />
-                    </Button>
-                  </Stack>
-                </Paper>
-              </Grid>
-              <Grid item xs={6}>
-                <Paper
-                  square={false}
-                  elevation={3}
-                  sx={{
-                    bgcolor: "lightgoldenrodyellow",
-                    height: 150,
-                    padding: 2,
-                  }}
-                >
-                  <Typography variant="h5" gutterBottom>
-                    30 VM Count
-                  </Typography>
-                  <Stack
-                    direction={"row"}
-                    sx={{ flex: 1, justifyContent: "space-between", mt: 10 }}
-                  >
-                    <Typography variant="h5" gutterBottom>
-                      {stats.VM30}
-                    </Typography>
-                    <Button
-                      onClick={() => modeSender("above 30 Virtual Machines")}
-                      variant="outlined"
-                      sx={{
-                        color: "#ffc400",
-                        borderColor: "#ffc400",
-                        "&:hover": {
-                          backgroundColor: "#ffff8d",
-                          borderColor: "#ffab00",
-                          boxShadow: "none",
-                        },
-                      }}
-                    >
-                      <ArrowForwardIosIcon />
-                    </Button>
-                  </Stack>
-                </Paper>
-              </Grid>
-              <Grid item xs={6}>
-                <Paper
-                  square={false}
-                  elevation={3}
-                  sx={{
-                    bgcolor: color,
-                    height: 150,
-                    padding: 2,
-                  }}
-                >
-                  <Typography variant="h5" gutterBottom>
-                    40 VM Count
-                  </Typography>
-                  <Stack
-                    direction={"row"}
-                    sx={{ flex: 1, justifyContent: "space-between", mt: 10 }}
-                  >
-                    <Typography variant="h5" gutterBottom>
-                      {stats.VM40}
-                    </Typography>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={() => modeSender("above 40 Virtual Machines")}
-                    >
-                      <ArrowForwardIosIcon />
-                    </Button>
-                  </Stack>
-                </Paper>
-              </Grid>
-            </Grid>
-          ) : null}
-        </Container>
-      </StyledRoot>
-    </>
-  );
+	console.log(tableData);
+	return (
+		<>
+			<Helmet>
+				<title> Dashboard | Monitoring Dashboard </title>
+			</Helmet>
+			<StyledRoot>
+				<SideNav />
+				<Container
+					maxWidth="xl"
+					sx={{ mt: 10 }}
+				>
+					<Typography variant="h5">Hi, Welcome back</Typography>
+					<div
+						style={{
+							justifySelf: "center",
+							alignItems: "center",
+							marginTop: "10px",
+						}}
+					>
+						{/* <InputLabel>Select</InputLabel>
+						<Select
+							label="Select Outlet"
+							name="Outlet"
+							placeholder="Select Outlet"
+							value="Outlet"
+							sx={{ minWidth: 120 }}
+						>
+							<MenuItem value={10}>Ten</MenuItem>
+							<MenuItem value={20}>Twenty</MenuItem>
+							<MenuItem value={30}>Thirty</MenuItem>
+						</Select> */}
+						<FormControl sx={{ width: "180px", mr: 2 }}>
+							<InputLabel id="demo-simple-select-label">
+								Select Outlet
+							</InputLabel>
+							<Select
+								labelId="demo-simple-select-label"
+								id="demo-simple-select"
+								// value={age}
+								label="Select Outlet"
+								// onChange={handleChange}
+							>
+								<MenuItem value={"Cheras Balokong"}>Cheras Balokong</MenuItem>
+							</Select>
+						</FormControl>
+						<DatePicker
+							label="Select Date"
+							value={value}
+							onChange={(newValue) => setValue(newValue)}
+						/>
+						<TextField
+							id="outlined-number"
+							label="Interval (Seconds)"
+							type="number"
+							sx={{ ml: 2 }}
+						/>
+						<Button
+							variant="contained"
+							sx={{ mt: 1, ml: 2 }}
+							// onClick={theftData}
+						>
+							Submit
+						</Button>
+						{/* <QuickFilteringGrid data={tableData} /> */}
+					</div>
+					{ready ? (
+						<Grid
+							container
+							spacing={2}
+							sx={{ mt: 3 }}
+						>
+							<QuickFilteringGrid data={tableData} />
+						</Grid>
+					) : (
+						<CircularProgress
+							variant="solid"
+							sx={{
+								display: "flex",
+								justifyContent: "center",
+								alignSelf: "center",
+								alignItems: "center",
+							}}
+							color="primary"
+						/>
+					)}
+				</Container>
+			</StyledRoot>
+		</>
+	);
 }
 
 export default DashboardPage;
