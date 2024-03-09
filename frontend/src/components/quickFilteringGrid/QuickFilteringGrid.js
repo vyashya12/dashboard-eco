@@ -10,6 +10,8 @@ const columns = [
 	{ field: "CashierTimestamp", headerName: "Cashier Timestamp" }, //dateTime
 	{ field: "Cashier", headerName: "Cashier" }, //cashier
 	{ field: "SalesID", headerName: "Sales ID" }, //id
+	{ field: "SiteID", headerName: "Site ID" }, //id
+
 	//we need to know cashier counter from xilnex
 	//timing is 12pm to 2pm then i still get 6pm data
 	//eye button on a column, opens a new tab(done)
@@ -38,7 +40,7 @@ const columns = [
 				);
 			} else {
 				return (
-					<div style={{ color: "yellow" }}>
+					<div style={{ color: "#FFC300" }}>
 						<p>{params.value}</p>
 					</div>
 				);
@@ -83,6 +85,10 @@ const columns = [
 	//allow only startdate
 	//add loader if progress bar is difficult, this usually takes 30 seconds
 	//livedata and hosting
+
+	//updates for phase 2,
+	// mini database to store the past 7 data so that it faster to take out
+	//let user to edit siteId tie together with camera
 ];
 
 const rowDataTable = [
@@ -92,6 +98,7 @@ const rowDataTable = [
 		CashierTimestamp: "2024-02-14T13:55:26.000Z",
 		Cashier: "BCOB10002 NUR ALYSHA BALQIS BINTI OTHMAN",
 		SalesID: 926103028,
+		SiteID: 92610,
 		StoreName: "Ecoshop Cheras Balakong",
 		Camera: "Cam 1 - Counter Left",
 		CameraTimestamp: "2024-02-14T13:55:26.000Z",
@@ -107,6 +114,7 @@ const rowDataTable = [
 		CashierTimestamp: "2024-02-14T13:55:54.000Z",
 		Cashier: "BCOB10002 NUR ALYSHA BALQIS BINTI OTHMAN",
 		SalesID: 926103029,
+		SiteID: 92610,
 		StoreName: "Ecoshop Cheras Balakong",
 		Camera: "Cam 1 - Counter Left",
 		CameraTimestamp: "2024-02-14T13:55:54.000Z",
@@ -119,15 +127,16 @@ const rowDataTable = [
 ];
 
 export default function QuickFilteringGrid({ data }) {
-	const [tableData, setTableData] = useState(data);
+	// console.log("TABLE", data);
+	// const [tableData, setTableData] = useState(data);
 	return (
 		<>
-			{rowDataTable.length ? (
+			{data.length ? (
 				<Box>
 					<DataGrid
-						rows={rowDataTable}
+						rows={data}
 						columns={columns}
-						sx={{ width: "auto" }}
+						// sx={{ width: "auto" }}
 						slots={{ toolbar: GridToolbar }}
 						initialState={{
 							pagination: {

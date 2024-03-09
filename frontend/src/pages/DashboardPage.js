@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import SideNav from "../components/sidenav/SideNav";
 import { Helmet } from "react-helmet-async";
 import {
+	Box,
 	Button,
 	CircularProgress,
 	Container,
@@ -32,31 +33,50 @@ const StyledRoot = styled("div")({
 
 function DashboardPage() {
 	const [tableData, setTableData] = useState();
-	const [ready, setReady] = useState(false);
+	const [ready, setReady] = useState(true);
 	const [value, setValue] = useState();
 	const [requestData, setRequestData] = useState({});
+	const [inputData, setInputData] = useState({});
+	const [startDate, setStartDate] = useState();
+	const [loading, setLoading] = useState(false);
 
-	useEffect(() => {
-		theftData();
-	}, []);
+	const onChangeHandler = (e) => {
+		setInputData((prev) => ({
+			...inputData,
+			...{ [e.target.name]: e.target.value },
+		}));
+	};
+	const onSubmitHandler = (e) => {
+		e.preventDefault();
+		theftData(startDate, inputData.interval);
+	};
 
-	let theftData = async () => {
+	// useEffect(() => {
+	// 	theftData();
+	// }, []);
+
+	let theftData = async (date, interval) => {
+		setLoading(true);
 		const requestOptions = {
 			method: "POST",
 			redirect: "follow",
 		};
 
 		await fetch(
-			"http://localhost:8000/sales?startDate=2024-02-14T12:00:00.000Z&endDate=2024-02-14T14:00:00.000Z",
+			`http://localhost:8000/sales?startDate=${date}&interval=${parseInt(
+				interval
+			)}`,
 			requestOptions
 		)
 			.then((response) => response.json())
 			.then((result) => {
 				setTableData(result.finalData);
 				setReady(true);
+				setLoading(false);
 			})
 			.catch((error) => console.error(error));
 		setReady(true);
+		setLoading(false);
 	};
 
 	console.log(tableData);
@@ -100,32 +120,52 @@ function DashboardPage() {
 								id="demo-simple-select"
 								// value={age}
 								label="Select Outlet"
-								// onChange={handleChange}
+								name="outlet"
+								onChange={onChangeHandler}
 							>
 								<MenuItem value={"Cheras Balokong"}>Cheras Balokong</MenuItem>
 							</Select>
 						</FormControl>
 						<DatePicker
 							label="Select Date"
-							value={value}
-							onChange={(newValue) => setValue(newValue)}
+							value={startDate}
+							onChange={(newValue) => setStartDate(newValue)}
 						/>
 						<TextField
 							id="outlined-number"
 							label="Interval (Seconds)"
 							type="number"
 							sx={{ ml: 2 }}
+							name="interval"
+							onChange={onChangeHandler}
 						/>
 						<Button
 							variant="contained"
 							sx={{ mt: 1, ml: 2 }}
-							// onClick={theftData}
+							onClick={(e) => onSubmitHandler(e)}
 						>
 							Submit
 						</Button>
 						{/* <QuickFilteringGrid data={tableData} /> */}
 					</div>
-					{ready ? (
+					{loading ? (
+						<Box
+							my={8}
+							display="flex"
+							alignItems="center"
+							justifyContent="center"
+							gap={4}
+							p={2}
+						>
+							<CircularProgress
+								variant="solid"
+								color="primary"
+							/>
+							<Typography variant="p">
+								This usually takes about 30 seconds
+							</Typography>
+						</Box>
+					) : ready && tableData ? (
 						<Grid
 							container
 							spacing={2}
@@ -133,18 +173,7 @@ function DashboardPage() {
 						>
 							<QuickFilteringGrid data={tableData} />
 						</Grid>
-					) : (
-						<CircularProgress
-							variant="solid"
-							sx={{
-								display: "flex",
-								justifyContent: "center",
-								alignSelf: "center",
-								alignItems: "center",
-							}}
-							color="primary"
-						/>
-					)}
+					) : null}
 				</Container>
 			</StyledRoot>
 		</>

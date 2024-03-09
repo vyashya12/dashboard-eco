@@ -62,20 +62,14 @@ function LoginPage() {
 		e.preventDefault();
 		if (Object.keys(inputLogin).length === 0) {
 			setError(true);
-			setHelperText("Fill your input lah Bro!!");
+			setHelperText("Please fill in your input!!");
 		} else {
-			// fetch(`${process.env.REACT_APP_URL}api/servers/login`, {
-			fetch(`${process.env.REACT_APP_URL}api/servers/login`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(inputLogin),
-			})
-				.then((data) => data.json())
-				.then((data) => validReponse(data));
-
-			inputLogin.Password = "";
+			if (inputLogin.Email == "admin" && inputLogin.Password == "password123") {
+				localStorage.setItem("userData", JSON.stringify(inputLogin));
+				navigate("/dashboard");
+			} else {
+				setHelperText("Invalid Credentials");
+			}
 		}
 	};
 	return (
@@ -85,11 +79,11 @@ function LoginPage() {
 			</Helmet>
 			<StyledContent>
 				<Container maxWidth="sm">
-					<form>
+					<form onSubmit={(e) => onSubmitHandler(e)}>
 						<Stack spacing={3}>
 							<TextField
 								name="Email"
-								label="Email address"
+								label="Username"
 								error={error}
 								required={true}
 								onChange={onChangeHandler}
@@ -147,7 +141,7 @@ function LoginPage() {
 							size="large"
 							type="submit"
 							variant="contained"
-							onClick={() => navigate("/dashboard")}
+							// onClick={() => navigate("/dashboard")}
 						>
 							Login
 						</LoadingButton>
