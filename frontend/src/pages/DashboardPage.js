@@ -63,9 +63,9 @@ function DashboardPage() {
 		};
 
 		await fetch(
-			`http://${
-				process.env.BACKEND
-			}:8000/sales?startDate=${date}&interval=${parseInt(interval)}`,
+			`http:////52.77.211.43:8000/sales?startDate=${date}&interval=${parseInt(
+				interval
+			)}`,
 			requestOptions
 		)
 			.then((response) => response.json())
