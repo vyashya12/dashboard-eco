@@ -63,7 +63,7 @@ function DashboardPage() {
 		};
 
 		await fetch(
-			`http:////52.77.211.43:8000/sales?startDate=${date}&interval=${parseInt(
+			`http://52.77.211.43:8000/sales?startDate=${date}&interval=${parseInt(
 				interval
 			)}`,
 			requestOptions
@@ -130,7 +130,6 @@ function DashboardPage() {
 						<DatePicker
 							label="Select Date"
 							value={startDate}
-							required
 							onChange={(newValue) => setStartDate(newValue)}
 						/>
 						<TextField
