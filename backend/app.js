@@ -23,6 +23,11 @@ app.get("/", (req, res) => {
 });
 
 app.post("/sales", async (req, res) => {
+	if (req.query.interval == "NaN" || req.query.startDate == "undefined") {
+		return res.json({
+			message: "Please type in your input",
+		});
+	}
 	let bcoSale = {};
 	let visitingRecord = {};
 	let token;
@@ -275,7 +280,7 @@ app.post("/sales", async (req, res) => {
 				closestSalesObj.diff = closestDiff;
 			}
 		});
-		// console.log(index, closestDiff);
+		console.log(index, closestDiff);
 		if (closestDiff <= req.query.interval * 1000) {
 			finalData.push({
 				id: closestSalesObj.id,
