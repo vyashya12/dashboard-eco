@@ -23,6 +23,11 @@ app.get("/", (req, res) => {
 });
 
 app.post("/sales", async (req, res) => {
+	if (req.query.interval == "NaN" || req.query.startDate == "undefined") {
+		return res.json({
+			message: "Please type in your input",
+		});
+	}
 	let bcoSale = {};
 	let visitingRecord = {};
 	let token;
@@ -168,25 +173,6 @@ app.post("/sales", async (req, res) => {
 
 	const camOneData = filtered(visitingRecord);
 
-	// function compareDatetime(date1, date2) {
-	// 	// Parse datetime strings into Date objects
-	// 	const d1 = new Date(date1);
-	// 	const d2 = new Date(date2);
-
-	// 	// Calculate the difference in milliseconds between the two datetime objects
-	// 	const diffMilliseconds = Math.abs(d1 - d2);
-
-	// 	// Convert milliseconds difference to seconds
-	// 	const diffSeconds = diffMilliseconds / 1000;
-
-	// 	// Check if the absolute difference is less than or equal to 20 seconds
-	// 	if (diffSeconds <= 20 || diffSeconds >= 20 || diffSeconds === 0) {
-	// 		return "Matched";
-	// 	} else {
-	// 		return "Suspect";
-	// 	}
-	// }
-
 	function findMatch(salesObj, camData, timeDifference) {
 		// Convert salesData timestamp to a Date object
 		const salesDate = new Date(salesObj.dateTime);
@@ -243,28 +229,55 @@ app.post("/sales", async (req, res) => {
 
 	console.log(req.query.interval);
 
-	// res.json(camOneData);
-
 	let finalData = [];
-	const promises = filteredSales.map(async (element, index) => {
-		let faces_frame = await getFacesFrame(
-			camOneData[index]?.visitor_id.toString()
-		);
+	let reallyfinal = [];
 
-		finalData.push({
-			id: element.id,
-			Outlet: element.outlet,
-			CashierTimestamp: element.dateTime,
-			Cashier: element.cashier,
-			SalesID: element.id,
-			StoreName: camOneData[index]?.store_name,
-			Camera: camOneData[index]?.device_name,
-			CameraTimestamp: camOneData[index]?.timestamp,
-			SiteID: element.siteId,
-			TheftProtection: findMatch(element, camOneData, req.query.interval),
-			FaceImage: camOneData[index]?.faces_image,
-			FrameImage: faces_frame ? faces_frame : false,
+	const promises = camOneData.map(async (element) => {
+		const camDate = new Date(element.timestamp);
+
+		let closestSalesObj;
+		let closestDiff = Infinity;
+
+		await filteredSales.map((salesObj) => {
+			const salesDate = new Date(salesObj.dateTime);
+			const diff = Math.abs(camDate.getTime() - salesDate.getTime());
+			if (diff < closestDiff) {
+				closestDiff = diff;
+				closestSalesObj = salesObj;
+				closestSalesObj.diff = closestDiff;
+			}
 		});
+		if (closestDiff <= req.query.interval * 1000) {
+			finalData.push({
+				id: closestSalesObj.id,
+				Outlet: closestSalesObj.outlet,
+				CashierTimestamp: closestSalesObj.dateTime,
+				Cashier: closestSalesObj.cashier,
+				SalesID: closestSalesObj.id,
+				StoreName: element.store_name,
+				Camera: element.device_name,
+				CameraTimestamp: element.timestamp,
+				SiteID: closestSalesObj.siteId,
+				TheftProtection: "Matched",
+				FaceImage: element.faces_image,
+				FrameImage: await getFacesFrame(element.visitor_id),
+			});
+		} else {
+			finalData.push({
+				id: closestSalesObj.id,
+				Outlet: closestSalesObj.outlet,
+				CashierTimestamp: closestSalesObj.dateTime,
+				Cashier: closestSalesObj.cashier,
+				SalesID: closestSalesObj.id,
+				StoreName: element.store_name,
+				Camera: element.device_name,
+				CameraTimestamp: element.timestamp,
+				SiteID: closestSalesObj.siteId,
+				TheftProtection: "Suspect",
+				FaceImage: element.faces_image,
+				FrameImage: await getFacesFrame(element.visitor_id),
+			});
+		}
 	});
 
 	await Promise.all(promises);

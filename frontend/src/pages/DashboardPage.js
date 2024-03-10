@@ -63,9 +63,9 @@ function DashboardPage() {
 		};
 
 		await fetch(
-			`http://localhost:8000/sales?startDate=${date}&interval=${parseInt(
-				interval
-			)}`,
+			`http://${
+				process.env.BACKEND
+			}:8000/sales?startDate=${date}&interval=${parseInt(interval)}`,
 			requestOptions
 		)
 			.then((response) => response.json())
@@ -121,6 +121,7 @@ function DashboardPage() {
 								// value={age}
 								label="Select Outlet"
 								name="outlet"
+								required
 								onChange={onChangeHandler}
 							>
 								<MenuItem value={"Cheras Balokong"}>Cheras Balokong</MenuItem>
@@ -129,6 +130,7 @@ function DashboardPage() {
 						<DatePicker
 							label="Select Date"
 							value={startDate}
+							required
 							onChange={(newValue) => setStartDate(newValue)}
 						/>
 						<TextField
@@ -137,6 +139,7 @@ function DashboardPage() {
 							type="number"
 							sx={{ ml: 2 }}
 							name="interval"
+							required
 							onChange={onChangeHandler}
 						/>
 						<Button
